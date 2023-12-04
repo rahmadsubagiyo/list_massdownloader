@@ -1,0 +1,39 @@
+import os
+import pandas as pd
+import numpy as np
+from datetime import datetime
+
+currentMonth = datetime.now().month
+
+def left(s, amount):
+    return s[:amount]
+
+dir_path = "D:\TeraBoxDownload\TeraBoxDownload"
+
+files_dir = [
+    f for f in os.listdir(dir_path) if os.path.isdir(os.path.join(dir_path, f))
+]
+
+month_dir = []
+
+for x in files_dir:
+    month_dir.append(left(x, int(x.find("_" + str(currentMonth)))+1))
+
+sheet1 = pd.DataFrame(files_dir)
+df = pd.DataFrame(month_dir)
+
+new_df = df.replace('',0)
+
+sheet2 = new_df[(new_df.T != 0).any()]
+
+
+with pd.ExcelWriter(r'D:\export_dataframe.xlsx') as writer:
+    sheet1.to_excel(writer, sheet_name = 'Sheet1', index=False)
+    sheet2.to_excel(writer, sheet_name = 'Sheet2', index=False)   
+
+for x in range(len(sheet2)):
+    path = os.path.join(dir_path,sheet2[0].values[x])
+    os.makedirs(path,exist_ok=True)
+    print(sheet2[0].values[x])
+
+#print(sheet2)
